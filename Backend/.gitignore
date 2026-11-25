@@ -1,0 +1,38 @@
+out/
+*.class
+
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+*.log
+
+# Environment variables and API keys
+.env
+.env.*
+!.env.example
+
+# Secrets
+secrets/
+*.pem
+*.key
+
+# Debug and logs
+*.log
+debug.log
+npm-debug.log*
+yarn-debug.log*
+
+# Java compiled files
+out/
+*.class
+
+# IDE
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db

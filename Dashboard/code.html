@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="web_standard" name="shell-type"/>
+  <title>AETHER // Smart Weather Station</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#0f1015",
+            "surface-container": "#16171d",
+            "primary": "#ffc174",
+            "primary-container": "#f59e0b"
+          },
+          fontFamily: {
+            "sans": ["Geist", "sans-serif"],
+            "display": ["Space Grotesk", "sans-serif"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      margin: 0;
+      background-color: #0b0c10;
+      color: #e3e1e9;
+      overscroll-behavior: none;
+    }
+    ::-webkit-scrollbar { display: none; }
+
+    /* Parallax slow drift */
+    @keyframes kenBurnsSlow {
+      0% { transform: scale(1.02) translate(0, 0); }
+      50% { transform: scale(1.06) translate(-1%, -0.8%); }
+      100% { transform: scale(1.02) translate(0, 0); }
+    }
+    .anim-ken-burns { animation: kenBurnsSlow 30s ease-in-out infinite; }
+
+    /* Continuous Clouds Drift */
+    @keyframes cloudDriftA {
+      0% { transform: translateX(-40%); }
+      100% { transform: translateX(120%); }
+    }
+    @keyframes cloudDriftB {
+      0% { transform: translateX(-50%); }
+      100% { transform: translateX(115%); }
+    }
+    @keyframes cloudDriftC {
+      0% { transform: translateX(-30%); }
+      100% { transform: translateX(130%); }
+    }
+    .cloud-layer-1 { animation: cloudDriftA 36s linear infinite; }
+    .cloud-layer-2 { animation: cloudDriftB 24s linear infinite -10s; }
+    .cloud-layer-3 { animation: cloudDriftC 48s linear infinite -22s; }
+
+    /* Warm Solar Aura Breathing Pulse */
+    @keyframes solarPulse {
+      0%, 100% { opacity: 0.55; transform: scale(1) translate(0, 0); }
+      50% { opacity: 0.85; transform: scale(1.15) translate(2%, -2%); }
+    }
+    .solar-pulse-glow { animation: solarPulse 8s ease-in-out infinite; }
+
+    /* Twinkling Starlight */
+    @keyframes starPulse {
+      0%, 100% { opacity: 0.25; transform: scale(0.9); }
+      50% { opacity: 0.95; transform: scale(1.3); filter: drop-shadow(0 0 6px rgba(245,158,11,0.8)); }
+    }
+    .star-1 { animation: starPulse 3.5s ease-in-out infinite; }
+    .star-2 { animation: starPulse 5.2s ease-in-out infinite 1.2s; }
+    .star-3 { animation: starPulse 4.4s ease-in-out infinite 2.5s; }
+
+    /* Floating Atmospheric Particles/Motes */
+    @keyframes moteFloat {
+      0% { transform: translateY(0) translateX(0); opacity: 0; }
+      20% { opacity: 0.85; }
+      80% { opacity: 0.6; }
+      100% { transform: translateY(-70px) translateX(30px); opacity: 0; }
+    }
+    .mote-anim-1 { animation: moteFloat 6s ease-in-out infinite; }
+    .mote-anim-2 { animation: moteFloat 8s ease-in-out infinite 2s; }
+    .mote-anim-3 { animation: moteFloat 7s ease-in-out infinite 3.8s; }
+
+    /* Continuous Rain Streaks */
+    @keyframes rainDrop {
+      0% { transform: translateY(-90px) translateX(0); opacity: 0; }
+      25% { opacity: 0.75; }
+      85% { opacity: 0.75; }
+      100% { transform: translateY(420px) translateX(-45px); opacity: 0.1; }
+    }
+    .rain-streak-line {
+      position: absolute;
+      width: 1.5px;
+      background: linear-gradient(to bottom, transparent, rgba(143,213,255,0.7), rgba(255,255,255,0.95));
+      border-radius: 9999px;
+      animation: rainDrop 0.85s linear infinite;
+    }
+
+    /* Ground Splash Rings */
+    @keyframes splashRipple {
+      0% { transform: scale(0.1); opacity: 0.9; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    .splash-ring { animation: splashRipple 1.1s ease-out infinite; }
+
+    /* Procedural Lightning Flash */
+    @keyframes lightningSequence {
+      0%, 90%, 94%, 98%, 100% { opacity: 0; }
+      91% { opacity: 0.9; filter: brightness(1.9); }
+      92% { opacity: 0.2; }
+      93% { opacity: 1; filter: brightness(2.2); }
+      95% { opacity: 0.4; }
+    }
+    .lightning-storm-flash { animation: lightningSequence 6.5s cubic-bezier(0.2, 1, 0.4, 1) infinite; }
+
+    /* Animated Weather Icon beside temp */
+    @keyframes sunSpinSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .sun-ray-spin { animation: sunSpinSlow 20s linear infinite; transform-origin: center center; }
+
+    @keyframes sunCoreGlow {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(245,158,11,0.6)); }
+      50% { transform: scale(1.1); filter: drop-shadow(0 0 14px rgba(245,158,11,0.95)); }
+    }
+    .sun-core-pulse { animation: sunCoreGlow 3s ease-in-out infinite; transform-origin: center center; }
+
+    @keyframes cloudBobbing {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    .cloud-bob { animation: cloudBobbing 3.8s ease-in-out infinite; }
+
+    @keyframes dropMini {
+      0% { transform: translateY(-2px); opacity: 0; }
+      40% { opacity: 1; }
+      100% { transform: translateY(7px); opacity: 0; }
+    }
+    .drop-anim-1 { animation: dropMini 0.9s linear infinite; }
+    .drop-anim-2 { animation: dropMini 0.9s linear infinite 0.3s; }
+    .drop-anim-3 { animation: dropMini 0.9s linear infinite 0.6s; }
+
+    @keyframes boltStrikeMini {
+      0%, 86%, 94%, 100% { opacity: 0.2; }
+      88%, 92% { opacity: 1; filter: drop-shadow(0 0 8px #f59e0b); }
+    }
+    .bolt-mini-flash { animation: boltStrikeMini 2.8s ease-in-out infinite; }
+
+    /* Interactive Cards */
+    .telemetry-card {
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                  border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                  box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .telemetry-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(245, 158, 11, 0.45);
+      box-shadow: 0 12px 30px -8px rgba(245, 158, 11, 0.15);
+    }
+    .telemetry-card:hover .sensor-icon {
+      transform: translateY(-2px) scale(1.1);
+      color: #ffc174;
+    }
+    .sensor-icon { transition: transform 0.25s ease, color 0.25s ease; }
+
+    /* Breathing Status Badges */
+    @keyframes breathingPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
+      50% { box-shadow: 0 0 0 5px rgba(52, 211, 153, 0); }
+    }
+    .pulse-status-green { animation: breathingPulse 2.6s infinite; }
+
+    /* Page Crossfade Transition */
+    .view-panel {
+      transition: opacity 0.28s ease, transform 0.28s ease;
+    }
+    .view-panel.hidden-view {
+      display: none;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    /* SVG Graph Dynamic Spline Transition */
+    #sensorChartLine, #sensorChartArea {
+      transition: d 0.5s cubic-bezier(0.2, 1, 0.3, 1), stroke 0.4s ease, fill 0.4s ease;
+    }
+    #sensorChartDot {
+      transition: cx 0.5s cubic-bezier(0.2, 1, 0.3, 1), cy 0.5s cubic-bezier(0.2, 1, 0.3, 1), fill 0.4s ease;
+    }
+  </style>
+</head>
+<body class="bg-[#0b0c10] text-[#e3e1e9] font-sans antialiased selection:bg-amber-500/20 selection:text-amber-300">
+<div class="flex min-h-screen w-full relative">
+
+  <!-- MOBILE TOP HEADER (Sticky) -->
+  <div class="lg:hidden fixed top-0 inset-x-0 z-50 bg-[#0c0d12]/95 backdrop-blur-md border-b border-white/[0.06] px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-white/[0.03] border border-white/[0.08]">
+        <img alt="AETHER Logo" class="w-6 h-6 object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UgM8X9e_-wvweUIufK99pZEjVW42QkqwfQrsaD6PyrcpmGJng9DSmEsO6zdZLrkeU_4wiuE02XVZyceUUqN2mg3LSEA_q7c4WYq1YwJaI2yLduxd9qU4ToKdeE1-ER6BV7X0rmUbVn_SaX-7eKN3bW5qsLIthakPDwu6mhreGuLRLwQeR5d1dlYpeQ1cTHmaMQSmjjY4UKO_TIFyf3ku4laloe2AqdprjsTkrylbGN"/>
+      </div>
+      <span class="font-display font-semibold tracking-wide text-sm text-white">AETHER</span>
+      <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono pulse-status-green">ONLINE</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="px-2.5 py-1 text-xs rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 border border-white/[0.08] transition flex items-center gap-1" onclick="toggleAuthModal()">
+        <span class="material-symbols-outlined text-[15px]">person</span>
+        <span id="mobileAuthLabel">Sign In</span>
+      </button>
+      <button class="p-1.5 rounded-lg text-zinc-400 hover:text-white bg-white/[0.04] border border-white/[0.06]" onclick="toggleMobileSidebar()">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- BACKDROP FOR MOBILE DRAWER -->
+  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity" id="sidebarBackdrop" onclick="toggleMobileSidebar(false)"></div>
+
+  <!-- LEFT SIDEBAR NAVIGATION -->
+  <aside class="w-64 shrink-0 border-r border-white/[0.05] bg-[#0c0d12]/95 backdrop-blur-md flex flex-col justify-between p-6 fixed inset-y-0 left-0 z-40 -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out" id="mainSidebar">
+    <div class="space-y-7">
+      <!-- Brand Header -->
+      <div class="flex items-center justify-between px-1">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center bg-white/[0.03] border border-white/[0.08] shadow-inner">
+            <img alt="AETHER Logo" class="w-7 h-7 object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UgM8X9e_-wvweUIufK99pZEjVW42QkqwfQrsaD6PyrcpmGJng9DSmEsO6zdZLrkeU_4wiuE02XVZyceUUqN2mg3LSEA_q7c4WYq1YwJaI2yLduxd9qU4ToKdeE1-ER6BV7X0rmUbVn_SaX-7eKN3bW5qsLIthakPDwu6mhreGuLRLwQeR5d1dlYpeQ1cTHmaMQSmjjY4UKO_TIFyf3ku4laloe2AqdprjsTkrylbGN"/>
+          </div>
+          <div>
+            <div class="font-display font-semibold tracking-wide text-base text-white">AETHER</div>
+            <div class="text-[11px] text-zinc-500 tracking-wider uppercase font-medium">Weather Station</div>
+          </div>
+        </div>
+        <button class="lg:hidden text-zinc-500 hover:text-zinc-300 p-1" onclick="toggleMobileSidebar(false)">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="space-y-1.5" id="navMenuList">
+        <!-- Overview (Active) -->
+        <button class="nav-btn w-full text-left flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 font-medium text-sm transition-all group shadow-[0_0_20px_rgba(245,158,11,0.06)]" id="nav-overview" onclick="switchTab('overview')">
+          <svg class="w-4 h-4 text-amber-400 group-hover:scale-105 transition-transform shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+            <rect height="9" rx="1" width="7" x="3" y="3"></rect><rect height="5" rx="1" width="7" x="14" y="3"></rect>
+            <rect height="9" rx="1" width="7" x="14" y="12"></rect><rect height="5" rx="1" width="7" x="3" y="16"></rect>
+          </svg>
+          <span>Overview</span>
+          <span class="active-dot ml-auto w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b]"></span>
+        </button>
+
+        <!-- Sensors -->
+        <button class="nav-btn w-full text-left flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.03] border border-transparent font-medium text-sm transition-all group" id="nav-sensors" onclick="switchTab('sensors')">
+          <svg class="w-4 h-4 text-zinc-400 group-hover:text-zinc-200 transition-colors shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+          <span>Sensors</span>
+          <span class="active-dot ml-auto w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b] hidden"></span>
+        </button>
+
+        <!-- Analytics -->
+        <button class="nav-btn w-full text-left flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.03] border border-transparent font-medium text-sm transition-all group" id="nav-analytics" onclick="switchTab('analytics')">
+          <svg class="w-4 h-4 text-zinc-400 group-hover:text-zinc-200 transition-colors shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path>
+          </svg>
+          <span>Analytics</span>
+          <span class="active-dot ml-auto w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b] hidden"></span>
+        </button>
+
+        <!-- Station -->
+        <button class="nav-btn w-full text-left flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.03] border border-transparent font-medium text-sm transition-all group" id="nav-station" onclick="switchTab('station')">
+          <svg class="w-4 h-4 text-zinc-400 group-hover:text-zinc-200 transition-colors shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path>
+            <circle cx="12" cy="12" r="2"></circle><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"></path>
+          </svg>
+          <span>Station</span>
+          <span class="active-dot ml-auto w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b] hidden"></span>
+        </button>
+
+        <!-- Settings -->
+        <button class="nav-btn w-full text-left flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.03] border border-transparent font-medium text-sm transition-all group" id="nav-settings" onclick="switchTab('settings')">
+          <svg class="w-4 h-4 text-zinc-400 group-hover:text-zinc-200 transition-colors shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <span>Settings</span>
+          <span class="active-dot ml-auto w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b] hidden"></span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Bottom Section: Auth button & Station Pill -->
+    <div class="space-y-2.5">
+      <button class="w-full p-2.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] text-xs text-zinc-300 hover:text-white transition flex items-center justify-between group" onclick="toggleAuthModal()">
+        <div class="flex items-center gap-2.5">
+          <div class="w-6 h-6 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-300">
+            <span class="material-symbols-outlined text-sm">person</span>
+          </div>
+          <div class="text-left">
+            <div class="font-medium truncate max-w-[110px]" id="userDisplayName">Operator Session</div>
+            <div class="text-[10px] text-zinc-500" id="userStatusTag">Sign in / Register</div>
+          </div>
+        </div>
+        <span class="material-symbols-outlined text-zinc-500 group-hover:text-amber-400 text-sm transition-transform">chevron_right</span>
+      </button>
+
+      <!-- Station Node Card -->
+      <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <div class="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-status-green"></span>
+          </div>
+          <div class="truncate">
+            <div class="text-xs font-medium text-zinc-200 truncate">Alpine Ridge #04</div>
+            <div class="text-[11px] text-zinc-500 flex items-center gap-1.5 font-mono">
+              <span>Online</span>
+              <span>•</span>
+              <span>1,420m</span>
+            </div>
+          </div>
+        </div>
+        <button class="text-zinc-500 hover:text-amber-400 p-1 transition-colors" onclick="switchTab('station')" title="View Diagnostics" type="button">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CANVAS -->
+  <main class="flex-1 lg:ml-64 min-h-screen px-4 py-20 lg:px-14 lg:py-12 max-w-7xl mx-auto flex flex-col gap-8 w-full overflow-x-hidden">
+    
+    <!-- Top Subtle Bar: Location, Status, Clock -->
+    <header class="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-white/[0.04]">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 text-zinc-400 text-sm">
+          <svg class="w-4 h-4 text-amber-400/90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span class="text-zinc-200 font-medium text-sm tracking-tight">Valais, Switzerland</span>
+          <span class="text-zinc-600">/</span>
+          <span class="text-xs text-zinc-500 font-mono">46.5° N, 8.2° E</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 sm:gap-6">
+        <div class="flex items-center gap-2 text-xs text-zinc-400 font-mono">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-status-green"></span>
+          <span id="liveSyncStatus">SYNCED 12s AGO</span>
+        </div>
+        <div class="h-3 w-px bg-white/10"></div>
+        <div class="text-xs text-zinc-400 font-mono">
+          <span class="font-medium text-zinc-200" id="liveClockUtc">14:02:44</span> UTC
+        </div>
+        <button class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] hover:border-amber-500/40 text-[11px] font-mono text-zinc-300 transition cursor-pointer" onclick="toggleUnitsQuick()" title="Click to toggle units">
+          <span class="text-amber-400" id="topUnitLabel">°C</span> / hPa
+        </button>
+      </div>
+    </header>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 1: OVERVIEW (Default View) -->
+    <!-- ========================================================================= -->
+    <section class="view-panel space-y-8" id="view-overview">
+      
+      <!-- HERO SECTION: Atmospheric Artwork & Living Weather Scene -->
+      <div class="relative w-full rounded-3xl overflow-hidden border border-white/[0.08] shadow-2xl group bg-[#0d0f15]" id="weatherHeroContainer">
+        
+        <!-- LAYER 1: Background Atmospheric Artwork with Cinematic Parallax -->
+        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <img alt="Atmospheric mountain silhouettes" class="w-full h-full object-cover object-center filter brightness-[0.88] contrast-[1.05] anim-ken-burns transition-all duration-1000" id="heroBgImage" src="https://lh3.googleusercontent.com/aida/AEtjO1Uxa8PVnuVlIadiDhsCSOGTzbF9BXbb_MXserN-VxWqt0DYaM46JsW4zElH0OGO4ZCadpRj1iImVitW_70rhsYVu0rhK6kr0GzuJ2e0o3GMpbE5wtxW50tU8WqCp7ycVgbbi0komWoVHD-inEI6EzDSDZaHRTACIgNIlERuUS8NCpC9lGJDsEy1jmmVnDHSXKjNb5oaC2PzU2LCK4WE-belpdF_zevkUP6mLR_pEIiA2pl7WDwDDbhnr1U"/>
+          
+          <!-- Stars (Clear State) -->
+          <div class="absolute inset-0 z-1 pointer-events-none transition-opacity duration-700" id="heroStarsLayer">
+            <span class="star-1 absolute top-[14%] left-[22%] w-1.5 h-1.5 rounded-full bg-amber-100 opacity-80 blur-[0.4px]"></span>
+            <span class="star-2 absolute top-[28%] left-[45%] w-1 h-1 rounded-full bg-white opacity-70"></span>
+            <span class="star-3 absolute top-[18%] right-[32%] w-1.5 h-1.5 rounded-full bg-amber-200 opacity-90 blur-[0.3px]"></span>
+          </div>
+
+          <!-- LAYER 2: Solar Aura / Horizon Radiant Amber Shift -->
+          <div class="solar-pulse-glow absolute -bottom-10 right-10 w-[560px] h-[340px] rounded-full bg-gradient-to-t from-amber-500/25 via-amber-600/10 to-transparent blur-3xl pointer-events-none transition-opacity duration-700" id="heroSolarAura"></div>
+
+          <!-- LAYER 3: Dynamic Animated Cloud Stream Layers (Continuous Visible Drift across sky) -->
+          <div class="absolute inset-0 z-2 pointer-events-none overflow-hidden transition-opacity duration-700" id="heroCloudsLayer">
+            <!-- High Soft Clouds -->
+            <svg class="cloud-layer-1 absolute top-3 -left-1/4 w-[140%] h-32 text-white/[0.14] fill-current blur-[2px]" preserveAspectRatio="none" viewBox="0 0 1000 120">
+              <path d="M50,80 Q140,20 250,55 Q350,15 480,60 Q580,25 700,65 Q820,30 920,80 Q500,120 50,80 Z"></path>
+            </svg>
+            <!-- Mid Altitude Cloud Stream -->
+            <svg class="cloud-layer-2 absolute top-14 -left-1/3 w-[150%] h-44 text-amber-200/[0.12] fill-current blur-[3px]" preserveAspectRatio="none" viewBox="0 0 1100 140">
+              <path d="M40,95 Q180,35 320,80 Q460,25 610,75 Q780,20 920,85 Q1040,40 1080,95 Q550,135 40,95 Z"></path>
+            </svg>
+            <!-- Mountain Ridges Drifting Fog/Mist (Parallax Foreground) -->
+            <svg class="cloud-layer-3 absolute bottom-20 -left-1/4 w-[160%] h-32 text-sky-200/[0.12] fill-current blur-[5px]" preserveAspectRatio="none" viewBox="0 0 1200 100">
+              <path d="M0,60 Q200,20 420,50 Q650,10 880,55 Q1060,20 1200,60 L1200,100 L0,100 Z"></path>
+            </svg>
+          </div>
+
+          <!-- LAYER 4: Continuous Rain Layer (Shown in Rain & Storm states) -->
+          <div class="absolute inset-0 z-3 pointer-events-none overflow-hidden opacity-0 transition-opacity duration-500" id="heroRainLayer">
+            <div class="rain-streak-line left-[8%]" style="height: 54px; animation-duration: 0.72s; animation-delay: 0.1s;"></div>
+            <div class="rain-streak-line left-[17%]" style="height: 64px; animation-duration: 0.65s; animation-delay: 0.38s;"></div>
+            <div class="rain-streak-line left-[26%]" style="height: 48px; animation-duration: 0.8s; animation-delay: 0.18s;"></div>
+            <div class="rain-streak-line left-[35%]" style="height: 58px; animation-duration: 0.69s; animation-delay: 0.52s;"></div>
+            <div class="rain-streak-line left-[44%]" style="height: 70px; animation-duration: 0.62s; animation-delay: 0.12s;"></div>
+            <div class="rain-streak-line left-[53%]" style="height: 50px; animation-duration: 0.75s; animation-delay: 0.32s;"></div>
+            <div class="rain-streak-line left-[62%]" style="height: 62px; animation-duration: 0.68s; animation-delay: 0.46s;"></div>
+            <div class="rain-streak-line left-[71%]" style="height: 56px; animation-duration: 0.71s; animation-delay: 0.22s;"></div>
+            <div class="rain-streak-line left-[80%]" style="height: 66px; animation-duration: 0.64s; animation-delay: 0.05s;"></div>
+            <div class="rain-streak-line left-[89%]" style="height: 54px; animation-duration: 0.78s; animation-delay: 0.4s;"></div>
+            <div class="rain-streak-line left-[96%]" style="height: 58px; animation-duration: 0.67s; animation-delay: 0.28s;"></div>
+            
+            <!-- Splashes at bottom -->
+            <div class="absolute bottom-16 left-[22%] w-4 h-1.5 border-t border-sky-300/40 rounded-full splash-ring"></div>
+            <div class="absolute bottom-14 left-[52%] w-5 h-2 border-t border-sky-300/40 rounded-full splash-ring" style="animation-delay: 0.4s;"></div>
+            <div class="absolute bottom-15 left-[78%] w-4 h-1.5 border-t border-sky-300/40 rounded-full splash-ring" style="animation-delay: 0.7s;"></div>
+          </div>
+
+          <!-- LAYER 5: Procedural Lightning Flash Overlay (For Storm) -->
+          <div class="absolute inset-0 z-4 pointer-events-none bg-gradient-to-b from-sky-100/40 via-amber-100/20 to-transparent opacity-0 transition-opacity" id="heroLightningLayer"></div>
+
+          <!-- LAYER 6: Floating Atmospheric Particles/Motes -->
+          <div class="absolute inset-0 z-2 pointer-events-none" id="heroMotesLayer">
+            <span class="mote-anim-1 absolute bottom-24 left-[28%] w-1.5 h-1.5 rounded-full bg-amber-300/80 blur-[0.4px]"></span>
+            <span class="mote-anim-2 absolute bottom-20 left-[45%] w-2 h-2 rounded-full bg-amber-200/70 blur-[0.6px]"></span>
+            <span class="mote-anim-3 absolute bottom-28 right-[34%] w-1.5 h-1.5 rounded-full bg-white/80 blur-[0.4px]"></span>
+          </div>
+
+          <!-- Dark Vignettes -->
+          <div class="absolute inset-0 bg-gradient-to-r from-[#0b0c10]/95 via-[#0b0c10]/65 to-transparent"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-[#0b0c10] via-transparent to-black/30"></div>
+        </div>
+
+        <!-- Hero Content Layer -->
+        <div class="relative z-10 p-6 sm:p-12 lg:p-14 flex flex-col justify-between min-h-[380px] lg:min-h-[420px]">
+          
+          <!-- Condition Selector Tabs -->
+          <div class="flex flex-wrap items-center gap-2.5">
+            <div class="flex items-center gap-1.5 p-1 rounded-full bg-black/40 border border-white/[0.08] backdrop-blur-md">
+              <button class="weather-btn px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30 text-xs font-display tracking-wider uppercase flex items-center gap-1.5 shadow-[0_0_15px_rgba(245,158,11,0.2)] transition hover:scale-105" id="btnWeather-clear" onclick="changeWeatherState('clear')" type="button">
+                <span class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b] animate-pulse"></span>Clear
+              </button>
+              <button class="weather-btn px-3 py-1 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.05] border border-transparent text-xs font-display tracking-wider uppercase flex items-center gap-1.5 transition hover:scale-105" id="btnWeather-cloudy" onclick="changeWeatherState('cloudy')" type="button">
+                <span class="w-1.5 h-1.5 rounded-full bg-zinc-300 hidden"></span>Cloudy
+              </button>
+              <button class="weather-btn px-3 py-1 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.05] border border-transparent text-xs font-display tracking-wider uppercase flex items-center gap-1.5 transition hover:scale-105" id="btnWeather-rain" onclick="changeWeatherState('rain')" type="button">
+                <span class="w-1.5 h-1.5 rounded-full bg-sky-400 hidden"></span>Rain
+              </button>
+              <button class="weather-btn px-3 py-1 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.05] border border-transparent text-xs font-display tracking-wider uppercase flex items-center gap-1.5 transition hover:scale-105" id="btnWeather-storm" onclick="changeWeatherState('storm')" type="button">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 hidden"></span>Storm
+              </button>
+            </div>
+            <span class="text-xs text-zinc-400 backdrop-blur-sm bg-black/20 px-3 py-1.5 rounded-full border border-white/[0.06]">Alpine Ridge Station</span>
+            <span class="ml-auto hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono text-zinc-400 bg-black/30 px-3 py-1 rounded-full border border-white/[0.05]">
+              <span class="text-amber-400">Zenith</span> 21.4° • UV 0.1 (Night)
+            </span>
+          </div>
+
+          <!-- Main Temperature & Animated Weather Indicator -->
+          <div class="my-auto py-6">
+            <div class="flex items-center gap-4 sm:gap-6 flex-wrap">
+              <!-- Temperature Number -->
+              <div class="flex items-baseline gap-2">
+                <span class="font-display text-7xl sm:text-8xl lg:text-9xl font-semibold tracking-tighter text-white drop-shadow-sm leading-none transition-all duration-300" id="heroTempVal">
+                  28.4
+                </span>
+                <span class="text-3xl sm:text-4xl lg:text-5xl font-light text-amber-400/90 font-display" id="heroTempUnit">°C</span>
+              </div>
+
+              <!-- LIVE ANIMATED WEATHER INDICATOR BESIDE TEMPERATURE -->
+              <div class="flex items-center justify-center p-3 rounded-2xl bg-black/35 border border-white/[0.08] backdrop-blur-md shadow-lg" title="Live Weather Indicator">
+                <!-- Clear Sun (Default) -->
+                <div class="relative w-14 h-14 flex items-center justify-center" id="iconAnim-clear">
+                  <svg class="sun-ray-spin absolute inset-0 w-full h-full text-amber-400/70" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 48 48">
+                    <line stroke-linecap="round" x1="24" x2="24" y1="3" y2="7"></line>
+                    <line stroke-linecap="round" x1="24" x2="24" y1="41" y2="45"></line>
+                    <line stroke-linecap="round" x1="3" x2="7" y1="24" y2="24"></line>
+                    <line stroke-linecap="round" x1="41" x2="45" y1="24" y2="24"></line>
+                    <line stroke-linecap="round" x1="9.15" x2="11.98" y1="9.15" y2="11.98"></line>
+                    <line stroke-linecap="round" x1="36.02" x2="38.85" y1="36.02" y2="38.85"></line>
+                    <line stroke-linecap="round" x1="9.15" x2="11.98" y1="38.85" y2="36.02"></line>
+                    <line stroke-linecap="round" x1="36.02" x2="38.85" y1="11.98" y2="9.15"></line>
+                  </svg>
+                  <div class="sun-core-pulse w-7 h-7 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 shadow-[0_0_14px_#f59e0b]"></div>
+                </div>
+                <!-- Cloudy Cloud -->
+                <div class="relative w-14 h-14 items-center justify-center hidden" id="iconAnim-cloudy">
+                  <div class="cloud-bob">
+                    <svg class="w-12 h-12 text-zinc-300 drop-shadow-[0_4px_12px_rgba(255,255,255,0.15)]" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+                    </svg>
+                  </div>
+                </div>
+                <!-- Rain Cloud + Droplets -->
+                <div class="relative w-14 h-14 items-center justify-center hidden" id="iconAnim-rain">
+                  <div class="cloud-bob relative">
+                    <svg class="w-11 h-11 text-zinc-300" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+                    </svg>
+                    <div class="absolute left-2 top-8 flex gap-1.5">
+                      <span class="drop-anim-1 w-0.5 h-3 rounded-full bg-sky-300"></span>
+                      <span class="drop-anim-2 w-0.5 h-3 rounded-full bg-sky-300"></span>
+                      <span class="drop-anim-3 w-0.5 h-3 rounded-full bg-sky-300"></span>
+                    </div>
+                  </div>
+                </div>
+                <!-- Storm Cloud + Lightning -->
+                <div class="relative w-14 h-14 items-center justify-center hidden" id="iconAnim-storm">
+                  <div class="cloud-bob relative">
+                    <svg class="w-11 h-11 text-zinc-400" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+                    </svg>
+                    <svg class="bolt-mini-flash absolute -bottom-2 left-3 w-5 h-6 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.08-.14L13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15L11 21z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subtext Line -->
+            <div class="mt-4 flex flex-wrap items-center gap-y-2 gap-x-5 text-sm sm:text-base text-zinc-300">
+              <span class="font-medium text-white" id="heroFeelsLike">Feels like 29°C</span>
+              <span class="text-zinc-600">•</span>
+              <span class="text-zinc-300" id="heroMinMax">High 31° <span class="text-zinc-600">/</span> Low 18°</span>
+              <span class="text-zinc-600">•</span>
+              <span class="text-zinc-400 text-xs sm:text-sm flex items-center gap-1.5" id="heroUpdatedTag">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400/80 pulse-status-green"></span>
+                Updated just now
+              </span>
+            </div>
+          </div>
+
+          <!-- Bottom Ambient Quick Metrics Bar -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-white/[0.1] backdrop-blur-md bg-black/30 -mx-6 sm:-mx-12 lg:-mx-14 -mb-6 sm:-mb-12 lg:-mb-14 px-6 sm:px-12 lg:px-14 py-4 rounded-b-3xl">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-zinc-300">
+                <svg class="w-4 h-4 text-sky-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path>
+                </svg>
+              </div>
+              <div>
+                <div class="text-[11px] text-zinc-400 uppercase tracking-wider font-medium">Humidity</div>
+                <div class="text-sm font-semibold text-white" id="heroHumidity">64%</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-zinc-300">
+                <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M17.7 7.7A7.1 7.1 0 0 0 5 10.8a7.3 7.3 0 0 0 1.4 4.3L12 21l5.6-5.9a7.3 7.3 0 0 0 1.4-4.3 7.1 7.1 0 0 0-1.3-3.1Z"></path>
+                </svg>
+              </div>
+              <div>
+                <div class="text-[11px] text-zinc-400 uppercase tracking-wider font-medium">Wind Speed</div>
+                <div class="text-sm font-semibold text-white" id="heroWind">12 km/h NW</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-zinc-300">
+                <svg class="w-4 h-4 text-zinc-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10"></circle><path d="m14 14-4-4"></path><path d="M12 6v2M12 16v2"></path>
+                </svg>
+              </div>
+              <div>
+                <div class="text-[11px] text-zinc-400 uppercase tracking-wider font-medium">Barometer</div>
+                <div class="text-sm font-semibold text-white" id="heroBaro">1012 hPa</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIX ATMOSPHERIC MODULES GRID -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between px-1">
+          <h2 class="text-xs font-display font-medium uppercase tracking-widest text-zinc-400">Atmospheric Modules</h2>
+          <span class="text-xs text-zinc-500">6 Live Telemetry Channels</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- CARD 1: TEMPERATURE -->
+          <div class="telemetry-card cursor-pointer p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex flex-col justify-between group" onclick="selectSensorFromCard('temp')">
+            <div class="flex items-center justify-between text-zinc-400">
+              <span class="text-xs font-display font-medium uppercase tracking-wider">Temperature</span>
+              <svg class="sensor-icon w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"></path>
+              </svg>
+            </div>
+            <div class="my-5">
+              <div class="text-3xl font-display font-semibold text-white tracking-tight" id="cardTempVal">28.4°C</div>
+              <div class="text-xs text-zinc-400 mt-1 flex items-center gap-2 font-mono">
+                <span class="text-amber-400">↑ 31.2°</span><span class="text-zinc-600">•</span><span class="text-sky-300">↓ 18.6°</span>
+              </div>
+            </div>
+            <div class="pt-2 border-t border-white/[0.04]">
+              <div class="flex justify-between items-center text-[11px] text-zinc-500 mb-1.5">
+                <span>24h Range</span>
+                <span class="text-amber-400/80 font-medium">Optimal</span>
+              </div>
+              <svg class="w-full h-7 overflow-visible" preserveAspectRatio="none" viewBox="0 0 200 28">
+                <path d="M0 22 C 40 20, 70 24, 100 12 C 140 2, 170 8, 200 16" fill="none" stroke="#f59e0b" stroke-linecap="round" stroke-width="2"></path>
+                <circle class="animate-pulse" cx="200" cy="16" fill="#f59e0b" r="3"></circle>
+              </svg>
+            </div>
+          </div>
+
+          <!-- CARD 2: HUMIDITY -->
+          <div class="telemetry-card cursor-pointer p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex flex-col justify-between group" onclick="selectSensorFromCard('humidity')">
+            <div class="flex items-center justify-between text-zinc-400">
+              <span class="text-xs font-display font-medium uppercase tracking-wider">Humidity</span>
+              <svg class="sensor-icon w-4 h-4 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path>
+              </svg>
+            </div>
+            <div class="my-5">
+              <div class="text-3xl font-display font-semibold text-white tracking-tight" id="cardHumidityVal">64%</div>
+              <div class="text-xs text-zinc-400 mt-1">Comfortable (Optimal)</div>
+            </div>
+            <div class="pt-2 border-t border-white/[0.04]">
+              <div class="flex justify-between items-center text-[11px] text-zinc-500 mb-1.5">
+                <span>Dew Point 20.8°C</span><span class="text-zinc-400">Target 40-70%</span>
+              </div>
+              <div class="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                <div class="h-full rounded-full bg-gradient-to-r from-sky-400 to-amber-300 transition-all duration-700" id="cardHumidityBar" style="width: 64%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD 3: RAINFALL -->
+          <div class="telemetry-card cursor-pointer p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex flex-col justify-between group" onclick="selectSensorFromCard('rain')">
+            <div class="flex items-center justify-between text-zinc-400">
+              <span class="text-xs font-display font-medium uppercase tracking-wider">Precipitation</span>
+              <svg class="sensor-icon w-4 h-4 text-sky-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="M16 14v6M8 14v6M12 16v6"></path>
+              </svg>
+            </div>
+            <div class="my-5">
+              <div class="text-3xl font-display font-semibold text-white tracking-tight" id="cardRainVal">0.0 mm</div>
+              <div class="text-xs text-zinc-400 mt-1" id="cardRainSub">0% chance of precipitation today</div>
+            </div>
+            <div class="pt-2 border-t border-white/[0.04] flex items-center justify-between text-[11px] text-zinc-500">
+              <span id="cardRainStatus">Dry conditions</span>
+              <span class="text-zinc-400" id="cardRainForecast">Next 24h clear</span>
+            </div>
+          </div>
+
+          <!-- CARD 4: WIND -->
+          <div class="telemetry-card cursor-pointer p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex flex-col justify-between group" onclick="selectSensorFromCard('wind')">
+            <div class="flex items-center justify-between text-zinc-400">
+              <span class="text-xs font-display font-medium uppercase tracking-wider">Wind</span>
+              <svg class="sensor-icon w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M17.7 7.7A7.1 7.1 0 0 0 5 10.8a7.3 7.3 0 0 0 1.4 4.3L12 21l5.6-5.9a7.3 7.3 0 0 0 1.4-4.3 7.1 7.1 0 0 0-1.3-3.1Z"></path>
+              </svg>
+            </div>
+            <div class="my-5">
+              <div class="text-3xl font-display font-semibold text-white tracking-tight" id="cardWindVal">12 km/h</div>
+              <div class="text-xs text-zinc-400 mt-1">Direction Northwest (315°) • Gentle breeze</div>
+            </div>
+            <div class="pt-2 border-t border-white/[0.04] flex items-center justify-between text-[11px] text-zinc-500">
+              <span>Beaufort Force 3</span>
+              <span class="text-amber-400/90 font-medium">Gusts to 22 km/h</span>
+            </div>
+          </div>
+
+          <!-- CARD 5: PRESSURE -->
+          <div class="telemetry-card cursor-pointer p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex flex-col justify-between group" onclick="selectSensorFromCard('baro')">
+            <div class="flex items-center justify-between text-zinc-400">
+              <span class="text-xs font-display font-medium uppercase tracking-wider">Barometric Pressure</span>
+              <svg class="sensor-icon w-4 h-4 text-zinc-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle><path d="m14 14-4-4"></path><path d="M12 6v2M12 16v2"></path>
+              </svg>
+            </div>
+            <div class="my-5">
+              <div class="text-3xl font-display font-semibold text-white tracking-tight" id="cardBaroVal">1012 hPa</div>
+              <div class="text-xs text-zinc-400 mt-1">Steady (+0.8 hPa / 3h)</div>
+            </div>
+            <div class="pt-2 border-t border-white/[0.04] flex items-center justify-between text-[11px] text-zinc-500">
+              <span>Continental High</span>
+              <span class="text-emerald-400 font-medium">Normal Range</span>
+            </div>
+          </div>
+
+          <!-- CARD 6: HARDWARE STATUS -->
+          <div class="telemetry-card cursor-pointer p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex flex-col justify-between group" onclick="switchTab('station')">
+            <div class="flex items-center justify-between text-zinc-400">
+              <span class="text-xs font-display font-medium uppercase tracking-wider">Station Status</span>
+              <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-semibold tracking-wider pulse-status-green">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                ONLINE
+              </span>
+            </div>
+            <div class="my-5">
+              <div class="text-3xl font-display font-semibold text-white tracking-tight">99.8%</div>
+              <div class="text-xs text-zinc-400 mt-1">Hardware Health • Solar Power Active</div>
+            </div>
+            <div class="pt-2 border-t border-white/[0.04] flex items-center justify-between text-[11px] text-zinc-500">
+              <span>Battery 94% (+18W)</span>
+              <span class="text-zinc-400">LTE-M Primary</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Java backend readings: additional channels and intelligence -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
+          <div class="telemetry-card p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
+            <div class="text-xs font-display font-medium uppercase tracking-wider text-zinc-400">UV Index</div>
+            <div class="text-3xl font-display font-semibold text-white mt-4" id="cardUvVal">--</div>
+            <div class="text-xs text-zinc-400 mt-1" id="cardUvStatus">Waiting for Java readings</div>
+          </div>
+          <div class="telemetry-card p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
+            <div class="text-xs font-display font-medium uppercase tracking-wider text-zinc-400">Air Quality Index</div>
+            <div class="text-3xl font-display font-semibold text-white mt-4" id="cardAqiVal">--</div>
+            <div class="text-xs text-zinc-400 mt-1" id="cardAqiStatus">Waiting for Java readings</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5">
+          <div class="lg:col-span-1 p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
+            <div class="text-xs uppercase tracking-wider text-zinc-400">Weather Risk Score</div>
+            <div class="flex items-end gap-2 mt-3"><span class="text-5xl font-display font-semibold text-white" id="riskScoreVal">--</span><span class="text-sm text-zinc-400 mb-2">/ 100</span></div>
+            <div class="text-sm font-medium text-emerald-400 mt-2" id="riskLevelVal">Waiting for backend</div>
+            <div class="h-2 rounded-full bg-white/10 mt-4 overflow-hidden"><div id="riskScoreBar" class="h-full rounded-full bg-emerald-400 transition-all duration-500" style="width:0%"></div></div>
+          </div>
+          <div class="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
+            <div class="text-xs uppercase tracking-wider text-zinc-400 mb-3">Smart Alerts</div>
+            <ul id="backendAlerts" class="text-sm text-zinc-200 space-y-2"><li class="text-zinc-500">Waiting for Java backend...</li></ul>
+          </div>
+          <div class="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
+            <div class="text-xs uppercase tracking-wider text-zinc-400 mb-3">Recommendations</div>
+            <ul id="backendRecommendations" class="text-sm text-zinc-200 space-y-2"><li class="text-zinc-500">Waiting for Java backend...</li></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 2: SENSORS (Dedicated Interactive Selector & High-Fidelity Graph) -->
+    <!-- ========================================================================= -->
+    <section class="view-panel hidden-view space-y-7" id="view-sensors">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div>
+          <h1 class="text-2xl font-display font-semibold text-white">Live Sensor Telemetry</h1>
+          <p class="text-xs text-zinc-400 mt-0.5">Select a calibrated sensor transducer to inspect precision live data stream</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-zinc-500">Sampling Cadence:</span>
+          <span class="text-xs font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">1000ms Realtime</span>
+        </div>
+      </div>
+
+      <!-- 6 Interactive Sensor Selector Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <button class="sensor-select-btn p-4 rounded-xl border border-amber-500/50 bg-amber-500/10 text-left transition relative overflow-hidden group shadow-[0_0_18px_rgba(245,158,11,0.15)]" id="sensorBtn-temp" onclick="selectSensor('temp')">
+          <div class="text-[11px] font-medium text-amber-300 uppercase tracking-wider">Temp</div>
+          <div class="text-xl font-display font-semibold text-white mt-1">28.4°C</div>
+          <div class="text-[10px] text-zinc-400 font-mono mt-1">Pt100 RTD</div>
+          <span class="active-dot-sensor absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_#f59e0b]"></span>
+        </button>
+        <button class="sensor-select-btn p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] text-left transition relative overflow-hidden group hover:border-amber-500/30" id="sensorBtn-humidity" onclick="selectSensor('humidity')">
+          <div class="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Humidity</div>
+          <div class="text-xl font-display font-semibold text-white mt-1">64%</div>
+          <div class="text-[10px] text-zinc-400 font-mono mt-1">Capacitive</div>
+          <span class="active-dot-sensor absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_#f59e0b] hidden"></span>
+        </button>
+        <button class="sensor-select-btn p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] text-left transition relative overflow-hidden group hover:border-amber-500/30" id="sensorBtn-rain" onclick="selectSensor('rain')">
+          <div class="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Precipitation</div>
+          <div class="text-xl font-display font-semibold text-white mt-1">0.0 mm</div>
+          <div class="text-[10px] text-zinc-400 font-mono mt-1">Optical Siphon</div>
+          <span class="active-dot-sensor absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_#f59e0b] hidden"></span>
+        </button>
+        <button class="sensor-select-btn p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] text-left transition relative overflow-hidden group hover:border-amber-500/30" id="sensorBtn-wind" onclick="selectSensor('wind')">
+          <div class="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Wind Speed</div>
+          <div class="text-xl font-display font-semibold text-white mt-1">12 km/h</div>
+          <div class="text-[10px] text-zinc-400 font-mono mt-1">Ultrasonic 3D</div>
+          <span class="active-dot-sensor absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_#f59e0b] hidden"></span>
+        </button>
+        <button class="sensor-select-btn p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] text-left transition relative overflow-hidden group hover:border-amber-500/30" id="sensorBtn-baro" onclick="selectSensor('baro')">
+          <div class="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Pressure</div>
+          <div class="text-xl font-display font-semibold text-white mt-1">1012 hPa</div>
+          <div class="text-[10px] text-zinc-400 font-mono mt-1">Piezoresistive</div>
+          <span class="active-dot-sensor absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_#f59e0b] hidden"></span>
+        </button>
+        <button class="sensor-select-btn p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] text-left transition relative overflow-hidden group hover:border-amber-500/30" id="sensorBtn-status" onclick="selectSensor('status')">
+          <div class="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">System Bus</div>
+          <div class="text-xl font-display font-semibold text-emerald-400 mt-1">100% OK</div>
+          <div class="text-[10px] text-zinc-400 font-mono mt-1">I2C / RS-485</div>
+          <span class="active-dot-sensor absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_#f59e0b] hidden"></span>
+        </button>
+      </div>
+
+      <!-- Focused Detailed Sensor Canvas & Dynamic Graph -->
+      <div class="p-6 sm:p-8 rounded-2xl bg-white/[0.03] border border-white/[0.07] space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.05]">
+          <div>
+            <div class="flex items-center gap-3">
+              <h3 class="text-xl font-display font-semibold text-white" id="activeSensorTitle">Temperature (Ambient Air)</h3>
+              <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono" id="activeSensorBadge">Calibrated Class A</span>
+            </div>
+            <p class="text-xs text-zinc-400 mt-1" id="activeSensorDesc">Platinum RTD four-wire transducer mounted inside aspirated radiation shield.</p>
+          </div>
+          <div class="flex items-center gap-6">
+            <div>
+              <div class="text-[10px] uppercase tracking-wider text-zinc-500">Peak (24H)</div>
+              <div class="text-base font-mono font-medium text-amber-300" id="activeSensorMax">31.2°C</div>
+            </div>
+            <div class="h-6 w-px bg-white/10"></div>
+            <div>
+              <div class="text-[10px] uppercase tracking-wider text-zinc-500">Low (24H)</div>
+              <div class="text-base font-mono font-medium text-sky-300" id="activeSensorMin">18.6°C</div>
+            </div>
+            <div class="h-6 w-px bg-white/10"></div>
+            <div>
+              <div class="text-[10px] uppercase tracking-wider text-zinc-500">Variance</div>
+              <div class="text-base font-mono font-medium text-zinc-200" id="activeSensorVar">±0.04°C</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- High-Fidelity SVG Interactive Graph with dynamic path morph -->
+        <div class="relative w-full h-72 sm:h-80 bg-black/30 rounded-xl p-4 border border-white/[0.04]">
+          <div class="absolute inset-4 grid grid-rows-4 pointer-events-none opacity-25">
+            <div class="border-b border-dashed border-zinc-500"></div>
+            <div class="border-b border-dashed border-zinc-500"></div>
+            <div class="border-b border-dashed border-zinc-500"></div>
+            <div></div>
+          </div>
+          <div class="absolute left-6 top-6 bottom-8 flex flex-col justify-between text-[10px] font-mono text-zinc-500 pointer-events-none" id="chartYLabels">
+            <span>32.0</span>
+            <span>27.0</span>
+            <span>22.0</span>
+            <span>18.0</span>
+          </div>
+
+          <svg class="w-full h-full pl-10 pb-6 pr-2 overflow-visible" id="sensorDetailSvg" preserveAspectRatio="none" viewBox="0 0 600 240">
+            <defs>
+              <linearGradient id="chartGradientAmber" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.35"></stop>
+                <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.0"></stop>
+              </linearGradient>
+              <linearGradient id="chartGradientSky" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"></stop>
+                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.0"></stop>
+              </linearGradient>
+              <linearGradient id="chartGradientEmerald" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#34d399" stop-opacity="0.35"></stop>
+                <stop offset="100%" stop-color="#34d399" stop-opacity="0.0"></stop>
+              </linearGradient>
+            </defs>
+            <path d="M 0 170 C 80 180, 160 190, 240 140 C 320 80, 420 50, 520 90 L 600 110 L 600 240 L 0 240 Z" fill="url(#chartGradientAmber)" id="sensorChartArea"></path>
+            <path d="M 0 170 C 80 180, 160 190, 240 140 C 320 80, 420 50, 520 90 L 600 110" fill="none" id="sensorChartLine" stroke="#f59e0b" stroke-linecap="round" stroke-width="2.5"></path>
+            <circle class="animate-pulse" cx="600" cy="110" fill="#f59e0b" id="sensorChartDot" r="4.5" stroke="#ffffff" stroke-width="1.5"></circle>
+          </svg>
+
+          <div class="absolute bottom-2 left-16 right-4 flex justify-between text-[10px] font-mono text-zinc-500">
+            <span>00:00</span>
+            <span>04:00</span>
+            <span>08:00</span>
+            <span>12:00</span>
+            <span>16:00</span>
+            <span>20:00</span>
+            <span>NOW</span>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3 text-xs bg-white/[0.02] p-3 rounded-xl border border-white/[0.04]">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-status-green"></span>
+            <span class="text-zinc-300 font-medium">Digital Bus Status: Synchronous Frame Lock</span>
+          </div>
+          <div class="text-zinc-500 font-mono">CRC-16: <span class="text-zinc-300">0x7F4B</span> • Loss: <span class="text-emerald-400">0.00%</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 3: ANALYTICS -->
+    <!-- ========================================================================= -->
+    <section class="view-panel hidden-view space-y-7" id="view-analytics">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-display font-semibold text-white">Atmospheric Analytics</h1>
+          <p class="text-xs text-zinc-400 mt-0.5">Live readings and short-term trends collected during this dashboard session</p>
+        </div>
+        <div class="inline-flex p-1 rounded-xl bg-white/[0.03] border border-white/[0.08] text-xs self-start sm:self-auto">
+          <button class="range-pill px-3.5 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 font-medium transition" id="range-24h" onclick="setAnalyticsRange('24h')">24H</button>
+          <button class="range-pill px-3.5 py-1.5 rounded-lg text-zinc-400 hover:text-white transition" id="range-7d" onclick="setAnalyticsRange('7d')">7D</button>
+          <button class="range-pill px-3.5 py-1.5 rounded-lg text-zinc-400 hover:text-white transition" id="range-30d" onclick="setAnalyticsRange('30d')">30D</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 p-6 rounded-2xl bg-white/[0.03] border border-white/[0.07] space-y-5">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-display font-semibold text-white">Temperature vs Barometric Correlation</h3>
+              <p class="text-xs text-zinc-400 mt-0.5">Dual-axis telemetry tracking thermal expansion against air mass density</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs font-mono">
+              <span class="flex items-center gap-1.5 text-amber-400"><span class="w-2 h-0.5 bg-amber-400 inline-block"></span> Temp</span>
+              <span class="flex items-center gap-1.5 text-sky-400"><span class="w-2 h-0.5 bg-sky-400 inline-block"></span> Pressure</span>
+            </div>
+          </div>
+          <div class="w-full h-64 bg-black/25 rounded-xl p-3 relative border border-white/[0.04]">
+            <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 500 200">
+              <path id="analyticsTempLine" d="M 0 140 C 60 150, 140 160, 200 110 C 270 50, 360 40, 440 80 L 500 95" fill="none" stroke="#f59e0b" stroke-width="2.5"></path>
+              <path id="analyticsPressureLine" d="M 0 60 C 90 70, 180 80, 260 110 C 340 140, 420 120, 500 80" fill="none" stroke="#38bdf8" stroke-dasharray="4 2" stroke-width="2"></path>
+            </svg>
+            <div class="absolute bottom-2 inset-x-4 flex justify-between text-[10px] font-mono text-zinc-500">
+              <span id="trendLabelStart">Yesterday 14:00</span>
+              <span>Midpoint</span>
+              <span>Today 14:00</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-3 pt-2 text-center text-xs">
+            <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+              <div class="text-zinc-500 text-[10px] uppercase">Correlation (r)</div>
+              <div class="font-mono text-white text-sm mt-0.5">-0.74 (Inverse)</div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+              <div class="text-zinc-500 text-[10px] uppercase">Mean Variance</div>
+              <div class="font-mono text-white text-sm mt-0.5">3.1°C / 1.8 hPa</div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+              <div class="text-zinc-500 text-[10px] uppercase">Inversion Layer</div>
+              <div class="font-mono text-emerald-400 text-sm mt-0.5">Absent (Stable)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.07] space-y-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-display font-semibold text-white">Wind Rose Distribution</h3>
+              <span class="text-[10px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">NW Dominant</span>
+            </div>
+            <p class="text-xs text-zinc-400 mt-0.5">Wind speed is supplied by the Java backend; wind direction is not currently measured.</p>
+          </div>
+          <div class="relative w-44 h-44 mx-auto my-2 flex items-center justify-center">
+            <div class="absolute inset-0 rounded-full border border-dashed border-white/10"></div>
+            <div class="absolute inset-5 rounded-full border border-white/[0.06]"></div>
+            <div class="absolute inset-12 rounded-full border border-white/[0.08]"></div>
+            <span class="absolute top-1 text-[10px] font-mono text-zinc-400 font-bold">N</span>
+            <span class="absolute bottom-1 text-[10px] font-mono text-zinc-400 font-bold">S</span>
+            <span class="absolute left-1 text-[10px] font-mono text-zinc-400 font-bold">W</span>
+            <span class="absolute right-1 text-[10px] font-mono text-zinc-400 font-bold">E</span>
+            <div class="w-24 h-0.5 bg-gradient-to-r from-amber-400 to-transparent -rotate-45 transform origin-center shadow-[0_0_8px_#f59e0b]"></div>
+            <div class="w-3 h-3 rounded-full bg-amber-400 border-2 border-[#0c0d12]"></div>
+          </div>
+          <div class="space-y-1.5 text-xs text-zinc-400 border-t border-white/[0.04] pt-3">
+            <div class="flex justify-between">
+              <span>Prevailing Azimuth:</span>
+              <span class="text-white font-mono">Not provided</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Max Gust:</span>
+              <span class="text-amber-400 font-mono" id="analyticsWindValue">-- km/h</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 4: STATION (Diagnostics) -->
+    <!-- ========================================================================= -->
+    <section class="view-panel hidden-view space-y-7" id="view-station">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div>
+          <h1 class="text-2xl font-display font-semibold text-white">Station Node Diagnostics</h1>
+          <p class="text-xs text-zinc-400 mt-0.5">Node Alpine Ridge #04 • Valais, Switzerland (46.5° N, 8.2° E, 1,420m AMSL)</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-mono flex items-center gap-1.5 pulse-status-green">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            HARDWARE ONLINE
+          </span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] space-y-2">
+          <div class="text-xs text-zinc-400 font-display uppercase tracking-wider">Continuous Uptime</div>
+          <div class="text-2xl font-display font-semibold text-white">99.8%</div>
+          <div class="text-[11px] text-zinc-500 font-mono">142 Days, 6 Hours without restart</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] space-y-2">
+          <div class="text-xs text-zinc-400 font-display uppercase tracking-wider">LiFePO4 Power Reserve</div>
+          <div class="text-2xl font-display font-semibold text-amber-300">13.6 V <span class="text-xs font-normal text-zinc-400">(94%)</span></div>
+          <div class="text-[11px] text-emerald-400 font-mono flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">solar_power</span> Solar charging (+18W)
+          </div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] space-y-2">
+          <div class="text-xs text-zinc-400 font-display uppercase tracking-wider">Telemetry Uplink</div>
+          <div class="text-2xl font-display font-semibold text-white">LTE-M / NB-IoT</div>
+          <div class="text-[11px] text-zinc-400 font-mono">RSRP -82 dBm • LoRaWAN OK</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] space-y-2">
+          <div class="text-xs text-zinc-400 font-display uppercase tracking-wider">Calibration</div>
+          <div class="text-2xl font-display font-semibold text-white">ISO-17025</div>
+          <div class="text-[11px] text-zinc-500 font-mono">Swiss Metrology Lab</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 5: SETTINGS -->
+    <!-- ========================================================================= -->
+    <section class="view-panel hidden-view space-y-7" id="view-settings">
+      <div>
+        <h1 class="text-2xl font-display font-semibold text-white">System Settings &amp; Configuration</h1>
+        <p class="text-xs text-zinc-400 mt-0.5">Manage scientific display units, telemetry refresh cadence, and API access</p>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.07] space-y-5">
+          <h3 class="text-sm font-display font-semibold text-white">Measurement Units</h3>
+          <div class="flex items-center justify-between py-2 border-b border-white/[0.04]">
+            <div>
+              <div class="text-xs font-medium text-zinc-200">Temperature Scale</div>
+              <div class="text-[11px] text-zinc-500">Celsius (°C) or Fahrenheit (°F)</div>
+            </div>
+            <div class="flex rounded-lg bg-black/40 p-1 border border-white/[0.06] text-xs font-mono">
+              <button class="px-3 py-1 rounded bg-amber-500/20 text-amber-300 font-medium" id="btnUnitC" onclick="setTempScale('C')">°C</button>
+              <button class="px-3 py-1 rounded text-zinc-400 hover:text-white" id="btnUnitF" onclick="setTempScale('F')">°F</button>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-2 border-b border-white/[0.04]">
+            <div>
+              <div class="text-xs font-medium text-zinc-200">Pressure Unit</div>
+              <div class="text-[11px] text-zinc-500">Hectopascals (hPa) or inHg</div>
+            </div>
+            <div class="flex rounded-lg bg-black/40 p-1 border border-white/[0.06] text-xs font-mono">
+              <button class="px-3 py-1 rounded bg-amber-500/20 text-amber-300 font-medium" id="btnUnitHpa" onclick="setPressureScale('hPa')">hPa</button>
+              <button class="px-3 py-1 rounded text-zinc-400 hover:text-white" id="btnUnitInhg" onclick="setPressureScale('inHg')">inHg</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.07] space-y-5">
+          <h3 class="text-sm font-display font-semibold text-white">Telemetry Access</h3>
+          <div class="space-y-2 pt-1">
+            <div class="text-xs font-medium text-zinc-200">REST / MQTT API Key</div>
+            <div class="flex items-center gap-2">
+              <input class="w-full bg-black/40 border border-white/[0.08] text-xs font-mono text-zinc-300 rounded-lg px-3 py-2" id="apiKeyInput" readonly type="password" value="aeth_live_89f02e4d91c1374a"/>
+              <button class="px-3 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] text-xs text-zinc-300 font-mono transition" onclick="toggleKeyVisibility()">Show</button>
+            </div>
+            <p class="text-[11px] text-zinc-500">Endpoint: <code class="font-mono text-zinc-400">https://api.aether.meteo/v1/node/ch-04</code></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-auto pt-6 pb-4 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
+      <div class="flex items-center gap-4">
+        <span>AETHER Meteorological Instruments</span>
+        <span>•</span>
+        <span>Node Alpine Ridge #04</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-status-green"></span>
+        <span>ISO-17025 Calibrated Precision System</span>
+      </div>
+    </footer>
+  </main>
+</div>
+
+<!-- AUTH / ACCOUNT MODAL -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md hidden transition-opacity" id="authModal">
+  <div class="w-full max-w-md bg-[#121318] border border-white/[0.09] rounded-2xl p-6 sm:p-7 shadow-2xl relative space-y-6">
+    <button class="absolute top-5 right-5 text-zinc-400 hover:text-white transition" onclick="toggleAuthModal(false)">
+      <span class="material-symbols-outlined text-xl">close</span>
+    </button>
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-white/[0.04] border border-white/[0.08]">
+        <img alt="AETHER Logo" class="w-6 h-6 object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UgM8X9e_-wvweUIufK99pZEjVW42QkqwfQrsaD6PyrcpmGJng9DSmEsO6zdZLrkeU_4wiuE02XVZyceUUqN2mg3LSEA_q7c4WYq1YwJaI2yLduxd9qU4ToKdeE1-ER6BV7X0rmUbVn_SaX-7eKN3bW5qsLIthakPDwu6mhreGuLRLwQeR5d1dlYpeQ1cTHmaMQSmjjY4UKO_TIFyf3ku4laloe2AqdprjsTkrylbGN"/>
+      </div>
+      <div>
+        <h3 class="font-display font-semibold text-white text-base">AETHER Station Access</h3>
+        <p class="text-xs text-zinc-400">Authenticated Station Control &amp; Telemetry</p>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 p-1 rounded-xl bg-black/40 border border-white/[0.06] text-xs font-medium text-center">
+      <button class="py-1.5 rounded-lg bg-amber-500/20 text-amber-300 transition" id="authTabLogin" onclick="setAuthTab('login')">Sign In</button>
+      <button class="py-1.5 rounded-lg text-zinc-400 hover:text-white transition" id="authTabRegister" onclick="setAuthTab('register')">Create Account</button>
+    </div>
+    <form class="space-y-4" id="loginForm" onsubmit="handleAuthSubmit(event, 'login')">
+      <div>
+        <label class="block text-xs font-medium text-zinc-300 mb-1">Email Address</label>
+        <input class="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/[0.08] text-sm text-white placeholder-zinc-500 focus:border-amber-400 focus:outline-none" required type="email" value="operator@aether.meteo"/>
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <label class="text-xs font-medium text-zinc-300">Security Password</label>
+          <a class="text-[11px] text-amber-400/80 hover:text-amber-300" href="#" onclick="alert('Reset link dispatched.'); return false;">Forgot password?</a>
+        </div>
+        <input class="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/[0.08] text-sm text-white placeholder-zinc-500 focus:border-amber-400 focus:outline-none" required type="password" value="alpine2025"/>
+      </div>
+      <button class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold text-sm transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)]" type="submit">
+        Sign In to Station
+      </button>
+    </form>
+    <form class="space-y-4 hidden" id="registerForm" onsubmit="handleAuthSubmit(event, 'register')">
+      <div>
+        <label class="block text-xs font-medium text-zinc-300 mb-1">Observer Name</label>
+        <input class="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/[0.08] text-sm text-white focus:border-amber-400 focus:outline-none" placeholder="Dr. Elena Rossi" required type="text"/>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-zinc-300 mb-1">Email</label>
+        <input class="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/[0.08] text-sm text-white focus:border-amber-400 focus:outline-none" placeholder="rossi@alpine-meteo.ch" required type="email"/>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-zinc-300 mb-1">Station Access Key</label>
+        <input class="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/[0.08] text-sm text-white focus:border-amber-400 focus:outline-none" placeholder="••••••••••••" required type="password"/>
+      </div>
+      <button class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold text-sm transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)]" type="submit">
+        Create Operator Account
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Client-Side Dynamic Engine -->
+<script>
+  let currentTab = 'overview';
+  let tempScale = 'C';
+  let currentCondition = 'clear';
+  let baseTempC = 28.4;
+  let activeSensorKey = 'temp';
+
+  const sensorDataConfigs = {
+    temp: {
+      title: "Temperature (Ambient Air)",
+      desc: "Platinum RTD four-wire transducer mounted inside aspirated radiation shield.",
+      badge: "Calibrated Class A",
+      max: "31.2°C", min: "18.6°C", variance: "±0.04°C",
+      yLabels: ["32.0", "27.0", "22.0", "18.0"],
+      color: "#f59e0b",
+      gradient: "chartGradientAmber",
+      linePath: "M 0 170 C 80 180, 160 190, 240 140 C 320 80, 420 50, 520 90 L 600 110",
+      areaPath: "M 0 170 C 80 180, 160 190, 240 140 C 320 80, 420 50, 520 90 L 600 110 L 600 240 L 0 240 Z",
+      dotY: 110
+    },
+    humidity: {
+      title: "Relative Humidity (Thin-Film)",
+      desc: "Fast-response capacitive polymer sensor with integrated anti-frost heater.",
+      badge: "WMO Tier-1",
+      max: "78%", min: "44%", variance: "±1.2%",
+      yLabels: ["90%", "70%", "50%", "30%"],
+      color: "#38bdf8",
+      gradient: "chartGradientSky",
+      linePath: "M 0 90 C 80 80, 160 70, 240 120 C 320 160, 420 180, 520 150 L 600 140",
+      areaPath: "M 0 90 C 80 80, 160 70, 240 120 C 320 160, 420 180, 520 150 L 600 140 L 600 240 L 0 240 Z",
+      dotY: 140
+    },
+    rain: {
+      title: "Precipitation Gauge (Tipping Bucket)",
+      desc: "Dual orifice optical raindrop sizer and heated aerodynamic funnel collector.",
+      badge: "Optical Siphon",
+      max: "0.0 mm/h", min: "0.0 mm/h", variance: "0.00 mm",
+      yLabels: ["10mm", "5mm", "2mm", "0mm"],
+      color: "#38bdf8",
+      gradient: "chartGradientSky",
+      linePath: "M 0 230 L 150 230 L 250 215 L 350 230 L 600 230",
+      areaPath: "M 0 230 L 150 230 L 250 215 L 350 230 L 600 230 L 600 240 L 0 240 Z",
+      dotY: 230
+    },
+    wind: {
+      title: "Wind Velocity & Vector (3D Ultrasonic)",
+      desc: "Solid-state acoustic travel-time anemometer with instant micro-gust capture.",
+      badge: "No Moving Parts",
+      max: "22.4 km/h", min: "4.2 km/h", variance: "±0.2 km/h",
+      yLabels: ["30 km/h", "20 km/h", "10 km/h", "0 km/h"],
+      color: "#f59e0b",
+      gradient: "chartGradientAmber",
+      linePath: "M 0 160 C 70 140, 130 190, 210 120 C 310 70, 410 150, 500 110 L 600 135",
+      areaPath: "M 0 160 C 70 140, 130 190, 210 120 C 310 70, 410 150, 500 110 L 600 135 L 600 240 L 0 240 Z",
+      dotY: 135
+    },
+    baro: {
+      title: "Atmospheric Barometer (High Altitude)",
+      desc: "Digital absolute piezoresistive transducer with temperature self-compensation.",
+      badge: "Sub-millibar Class",
+      max: "1014.2 hPa", min: "1009.8 hPa", variance: "±0.05 hPa",
+      yLabels: ["1020", "1015", "1010", "1005"],
+      color: "#e3e1e9",
+      gradient: "chartGradientAmber",
+      linePath: "M 0 140 C 90 130, 180 120, 270 100 C 370 85, 470 95, 600 90",
+      areaPath: "M 0 140 C 90 130, 180 120, 270 100 C 370 85, 470 95, 600 90 L 600 240 L 0 240 Z",
+      dotY: 90
+    },
+    uv: {
+      title: "Ultraviolet Index", desc: "Simulated UV sensor reading from the Java weather station.", badge: "Java Backend",
+      max: "--", min: "--", variance: "Live", yLabels: ["12", "8", "4", "0"], color: "#f59e0b", gradient: "chartGradientAmber", linePath: "M 0 170 L 600 110", areaPath: "M 0 170 L 600 110 L 600 240 L 0 240 Z", dotY: 110
+    },
+    airQuality: {
+      title: "Air Quality Index", desc: "Simulated AQI sensor reading from the Java weather station.", badge: "Java Backend",
+      max: "--", min: "--", variance: "Live", yLabels: ["400", "300", "200", "0"], color: "#34d399", gradient: "chartGradientEmerald", linePath: "M 0 170 L 600 110", areaPath: "M 0 170 L 600 110 L 600 240 L 0 240 Z", dotY: 110
+    },
+    status: {
+      title: "System Micro-Bus & Diagnostic Health",
+      desc: "Continuous hardware self-test: supply voltage, solar MPPT, and sensor latency.",
+      badge: "Watchdog Verified",
+      max: "100%", min: "99.4%", variance: "0 errors",
+      yLabels: ["100%", "99%", "98%", "95%"],
+      color: "#34d399",
+      gradient: "chartGradientEmerald",
+      linePath: "M 0 50 L 150 48 L 300 52 L 450 49 L 600 50",
+      areaPath: "M 0 50 L 150 48 L 300 52 L 450 49 L 600 50 L 600 240 L 0 240 Z",
+      dotY: 50
+    }
+  };
+
+  // Weather State Switcher with Visually Moving Scene
+  function changeWeatherState(state) {
+    currentCondition = state;
+    const heroBg = document.getElementById('heroBgImage');
+    const heroClouds = document.getElementById('heroCloudsLayer');
+    const heroRain = document.getElementById('heroRainLayer');
+    const heroLightning = document.getElementById('heroLightningLayer');
+    const heroAura = document.getElementById('heroSolarAura');
+    const heroStars = document.getElementById('heroStarsLayer');
+    const heroMotes = document.getElementById('heroMotesLayer');
+
+    // Update buttons
+    ['clear', 'cloudy', 'rain', 'storm'].forEach(s => {
+      const btn = document.getElementById(`btnWeather-${s}`);
+      const icon = document.getElementById(`iconAnim-${s}`);
+      const dot = btn.querySelector('span');
+      if (s === state) {
+        btn.className = "weather-btn px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30 text-xs font-display tracking-wider uppercase flex items-center gap-1.5 shadow-[0_0_15px_rgba(245,158,11,0.2)] transition hover:scale-105";
+        if (dot) { dot.classList.remove('hidden'); dot.className = "w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b] animate-pulse"; }
+        if (icon) { icon.classList.remove('hidden'); icon.classList.add('flex'); }
+      } else {
+        btn.className = "weather-btn px-3 py-1 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.05] border border-transparent text-xs font-display tracking-wider uppercase flex items-center gap-1.5 transition hover:scale-105";
+        if (dot) dot.classList.add('hidden');
+        if (icon) { icon.classList.add('hidden'); icon.classList.remove('flex'); }
+      }
+    });
+
+    // Animate Weather Scene Layers
+    if (state === 'clear') {
+      heroBg.style.filter = "brightness(0.88) contrast(1.05)";
+      heroClouds.style.opacity = "0.75";
+      heroRain.style.opacity = "0";
+      heroLightning.classList.remove('lightning-storm-flash');
+      heroLightning.style.opacity = "0";
+      heroAura.style.opacity = "0.8";
+      heroStars.style.opacity = "1";
+      heroMotes.style.opacity = "1";
+      baseTempC = 28.4;
+      document.getElementById('cardRainVal').textContent = "0.0 mm";
+      document.getElementById('cardRainSub').textContent = "0% chance of precipitation today";
+      document.getElementById('cardRainStatus').textContent = "Dry conditions";
+    } else if (state === 'cloudy') {
+      heroBg.style.filter = "brightness(0.68) contrast(0.95) saturate(0.75)";
+      heroClouds.style.opacity = "1";
+      heroRain.style.opacity = "0";
+      heroLightning.classList.remove('lightning-storm-flash');
+      heroLightning.style.opacity = "0";
+      heroAura.style.opacity = "0.2";
+      heroStars.style.opacity = "0.2";
+      heroMotes.style.opacity = "0.4";
+      baseTempC = 23.2;
+      document.getElementById('cardRainVal').textContent = "0.0 mm";
+      document.getElementById('cardRainSub').textContent = "Overcast cumulus cover 85%";
+      document.getElementById('cardRainStatus').textContent = "Condensing";
+    } else if (state === 'rain') {
+      heroBg.style.filter = "brightness(0.55) contrast(0.95) saturate(0.8)";
+      heroClouds.style.opacity = "0.9";
+      heroRain.style.opacity = "1"; // Continuously visible rain!
+      heroLightning.classList.remove('lightning-storm-flash');
+      heroLightning.style.opacity = "0";
+      heroAura.style.opacity = "0.1";
+      heroStars.style.opacity = "0";
+      heroMotes.style.opacity = "0";
+      baseTempC = 19.8;
+      document.getElementById('cardRainVal').textContent = "4.6 mm";
+      document.getElementById('cardRainSub').textContent = "Moderate precipitation falling";
+      document.getElementById('cardRainStatus').textContent = "Active rainfall";
+    } else if (state === 'storm') {
+      heroBg.style.filter = "brightness(0.42) contrast(1.15) saturate(0.7)";
+      heroClouds.style.opacity = "1";
+      heroRain.style.opacity = "1";
+      heroLightning.classList.add('lightning-storm-flash'); // Flash sequence!
+      heroAura.style.opacity = "0.05";
+      heroStars.style.opacity = "0";
+      heroMotes.style.opacity = "0";
+      baseTempC = 17.5;
+      document.getElementById('cardRainVal').textContent = "18.2 mm";
+      document.getElementById('cardRainSub').textContent = "Severe convective squall";
+      document.getElementById('cardRainStatus').textContent = "Thunderstorm Warning";
+    }
+
+    renderTemperatures();
+  }
+
+  function renderTemperatures() {
+    const val = tempScale === 'C' ? baseTempC.toFixed(1) : ((baseTempC * 9/5) + 32).toFixed(1);
+    const heroTempEl = document.getElementById('heroTempVal');
+    heroTempEl.style.opacity = '0.3';
+    setTimeout(() => {
+      heroTempEl.textContent = val;
+      heroTempEl.style.opacity = '1';
+    }, 150);
+    document.getElementById('cardTempVal').textContent = val + (tempScale === 'C' ? '°C' : '°F');
+  }
+
+  // Smooth Graph Dataset Transition
+  function selectSensor(key) {
+    activeSensorKey = key;
+    const cfg = sensorDataConfigs[key];
+    if (!cfg) return;
+
+    ['temp', 'humidity', 'rain', 'wind', 'baro', 'status', 'uv', 'airQuality'].forEach(k => {
+      const btn = document.getElementById(`sensorBtn-${k}`);
+      if (!btn) return;
+      const dot = btn.querySelector('.active-dot-sensor');
+      if (k === key) {
+        btn.className = "sensor-select-btn p-4 rounded-xl border border-amber-500/50 bg-amber-500/10 text-left transition relative overflow-hidden group shadow-[0_0_18px_rgba(245,158,11,0.15)]";
+        if (dot) dot.classList.remove('hidden');
+      } else {
+        btn.className = "sensor-select-btn p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] text-left transition relative overflow-hidden group hover:border-amber-500/30";
+        if (dot) dot.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('activeSensorTitle').textContent = cfg.title;
+    document.getElementById('activeSensorDesc').textContent = cfg.desc;
+    document.getElementById('activeSensorBadge').textContent = cfg.badge;
+    document.getElementById('activeSensorMax').textContent = cfg.max;
+    document.getElementById('activeSensorMin').textContent = cfg.min;
+    document.getElementById('activeSensorVar').textContent = cfg.variance;
+
+    const yLabels = document.getElementById('chartYLabels').children;
+    if (yLabels && cfg.yLabels) {
+      for (let i = 0; i < 4; i++) {
+        if (yLabels[i]) yLabels[i].textContent = cfg.yLabels[i];
+      }
+    }
+
+    // Smoothly morph SVG paths
+    const lineEl = document.getElementById('sensorChartLine');
+    const areaEl = document.getElementById('sensorChartArea');
+    const dotEl = document.getElementById('sensorChartDot');
+
+    lineEl.setAttribute('d', cfg.linePath);
+    lineEl.setAttribute('stroke', cfg.color);
+    areaEl.setAttribute('d', cfg.areaPath);
+    areaEl.setAttribute('fill', `url(#${cfg.gradient})`);
+    dotEl.setAttribute('cy', cfg.dotY);
+    dotEl.setAttribute('fill', cfg.color);
+    if (sensorHistory[key] && sensorHistory[key].length > 1) drawSensorHistory(key);
+  }
+
+  function selectSensorFromCard(key) {
+    switchTab('sensors');
+    setTimeout(() => selectSensor(key), 80);
+  }
+
+  // Navigation Tabs with short smooth fade/slide
+  function switchTab(tabId) {
+    currentTab = tabId;
+    const views = ['overview', 'sensors', 'analytics', 'station', 'settings'];
+    views.forEach(v => {
+      const panel = document.getElementById(`view-${v}`);
+      const navBtn = document.getElementById(`nav-${v}`);
+      if (!panel) return;
+      if (v === tabId) {
+        panel.classList.remove('hidden-view');
+        if (navBtn) {
+          navBtn.className = "nav-btn w-full text-left flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 font-medium text-sm transition-all group shadow-[0_0_20px_rgba(245,158,11,0.06)]";
+          const dot = navBtn.querySelector('.active-dot');
+          if (dot) dot.classList.remove('hidden');
+        }
+      } else {
+        panel.classList.add('hidden-view');
+        if (navBtn) {
+          navBtn.className = "nav-btn w-full text-left flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.03] border border-transparent font-medium text-sm transition-all group";
+          const dot = navBtn.querySelector('.active-dot');
+          if (dot) dot.classList.add('hidden');
+        }
+      }
+    });
+    toggleMobileSidebar(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleUnitsQuick() {
+    setTempScale(tempScale === 'C' ? 'F' : 'C');
+  }
+
+  function setTempScale(scale) {
+    tempScale = scale;
+    document.getElementById('topUnitLabel').textContent = `°${scale}`;
+    document.getElementById('heroTempUnit').textContent = `°${scale}`;
+    renderTemperatures();
+  }
+
+  let latestPressureHpa = 1012;
+  function setPressureScale(p) {
+    activePressureScale = p;
+    const value = p === 'hPa' ? `${latestPressureHpa.toFixed(1)} hPa` : `${(latestPressureHpa * 0.029529983).toFixed(2)} inHg`;
+    document.getElementById('heroBaro').textContent = value;
+    document.getElementById('cardBaroVal').textContent = value;
+    const hpaBtn = document.getElementById('btnUnitHpa');
+    const inhgBtn = document.getElementById('btnUnitInhg');
+    if (hpaBtn && inhgBtn) {
+      hpaBtn.className = p === 'hPa' ? 'px-3 py-1 rounded bg-amber-500/20 text-amber-300 font-medium' : 'px-3 py-1 rounded text-zinc-400 hover:text-white';
+      inhgBtn.className = p === 'inHg' ? 'px-3 py-1 rounded bg-amber-500/20 text-amber-300 font-medium' : 'px-3 py-1 rounded text-zinc-400 hover:text-white';
+    }
+  }
+
+  function setAnalyticsRange(r) {
+    ['24h', '7d', '30d'].forEach(x => {
+      const b = document.getElementById(`range-${x}`);
+      if (x === r) {
+        b.className = "range-pill px-3.5 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 font-medium transition";
+      } else {
+        b.className = "range-pill px-3.5 py-1.5 rounded-lg text-zinc-400 hover:text-white transition";
+      }
+    });
+  }
+
+  function toggleMobileSidebar(show) {
+    const s = document.getElementById('mainSidebar');
+    const b = document.getElementById('sidebarBackdrop');
+    const shouldOpen = show !== undefined ? show : s.classList.contains('-translate-x-full');
+    if (shouldOpen) {
+      s.classList.remove('-translate-x-full');
+      b.classList.remove('hidden');
+    } else {
+      s.classList.add('-translate-x-full');
+      b.classList.add('hidden');
+    }
+  }
+
+  function toggleAuthModal(show = true) {
+    const m = document.getElementById('authModal');
+    if (show) m.classList.remove('hidden'); else m.classList.add('hidden');
+  }
+
+  function setAuthTab(tab) {
+    const lTab = document.getElementById('authTabLogin');
+    const rTab = document.getElementById('authTabRegister');
+    const lForm = document.getElementById('loginForm');
+    const rForm = document.getElementById('registerForm');
+    if (tab === 'login') {
+      lTab.className = "py-1.5 rounded-lg bg-amber-500/20 text-amber-300 transition";
+      rTab.className = "py-1.5 rounded-lg text-zinc-400 hover:text-white transition";
+      lForm.classList.remove('hidden');
+      rForm.classList.add('hidden');
+    } else {
+      rTab.className = "py-1.5 rounded-lg bg-amber-500/20 text-amber-300 transition";
+      lTab.className = "py-1.5 rounded-lg text-zinc-400 hover:text-white transition";
+      rForm.classList.remove('hidden');
+      lForm.classList.add('hidden');
+    }
+  }
+
+  function handleAuthSubmit(e, type) {
+    e.preventDefault();
+    document.getElementById('userDisplayName').textContent = "Operator Verified";
+    document.getElementById('userStatusTag').textContent = "Swiss Alpine Node";
+    document.getElementById('mobileAuthLabel').textContent = "Operator";
+    toggleAuthModal(false);
+  }
+
+  function toggleKeyVisibility() {
+    const inp = document.getElementById('apiKeyInput');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+
+  // WEATHERIQ Java backend integration. All live readings now come from Java.
+  const WEATHER_API_URL = 'http://localhost:9090/api/weather';
+  const WEATHER_HEALTH_URL = 'http://localhost:9090/api/health';
+  let latestBackendData = null;
+  let activePressureScale = 'hPa';
+  const sensorHistory = { temp: [], humidity: [], rain: [], wind: [], baro: [], uv: [], airQuality: [] };
+
+  function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  }
+  function readingValue(data, key) {
+    const item = data && data.readings && data.readings[key];
+    return item && Number.isFinite(Number(item.value)) ? Number(item.value) : null;
+  }
+  function updateList(id, items, emptyText) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.replaceChildren();
+    const values = Array.isArray(items) ? items : [];
+    (values.length ? values : [emptyText]).forEach(item => {
+      const li = document.createElement('li');
+      li.className = values.length ? 'flex items-start gap-2' : 'text-zinc-500';
+      if (values.length) {
+        const dot = document.createElement('span'); dot.className = 'text-amber-400'; dot.textContent = '•'; li.appendChild(dot);
+      }
+      const text = document.createElement('span'); text.textContent = item; li.appendChild(text); el.appendChild(li);
+    });
+  }
+  function addHistory(key, value) {
+    if (value === null) return;
+    sensorHistory[key].push(value);
+    if (sensorHistory[key].length > 24) sensorHistory[key].shift();
+  }
+  function drawSensorHistory(key) {
+    const values = sensorHistory[key] || [];
+    if (values.length < 2) return;
+    const min = Math.min(...values), max = Math.max(...values);
+    const span = Math.max(max - min, 1);
+    const points = values.map((v, i) => {
+      const x = (i / (values.length - 1)) * 600;
+      const y = 210 - ((v - min) / span) * 165;
+      return [x, y];
+    });
+    const line = 'M ' + points.map(p => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' L ');
+    const area = `${line} L 600 240 L 0 240 Z`;
+    const lineEl = document.getElementById('sensorChartLine');
+    const areaEl = document.getElementById('sensorChartArea');
+    const dotEl = document.getElementById('sensorChartDot');
+    if (lineEl) lineEl.setAttribute('d', line);
+    if (areaEl) areaEl.setAttribute('d', area);
+    if (dotEl) { dotEl.setAttribute('cx', points[points.length - 1][0]); dotEl.setAttribute('cy', points[points.length - 1][1]); }
+    const cfg = sensorDataConfigs[key];
+    if (cfg) {
+      const labels = document.getElementById('chartYLabels')?.children;
+      if (labels && labels.length >= 4) {
+        labels[0].textContent = max.toFixed(1); labels[1].textContent = (min + span * 0.66).toFixed(1);
+        labels[2].textContent = (min + span * 0.33).toFixed(1); labels[3].textContent = min.toFixed(1);
+      }
+      setText('activeSensorMax', max.toFixed(1));
+      setText('activeSensorMin', min.toFixed(1));
+    }
+  }
+  function updateSensorSelector(key, value, unit) {
+    const id = ({temp:'temp', humidity:'humidity', rainfall:'rain', wind:'wind', pressure:'baro'})[key];
+    if (!id) return;
+    const btn = document.getElementById(`sensorBtn-${id}`);
+    if (btn) { const val = btn.querySelector('.text-xl'); if (val) val.textContent = `${value.toFixed(1)} ${unit}`; }
+  }
+  function drawAnalyticsHistory() {
+    const draw = (key, id) => {
+      const values = sensorHistory[key] || [];
+      const el = document.getElementById(id);
+      if (!el || values.length < 2) return;
+      const min = Math.min(...values), max = Math.max(...values), span = Math.max(max - min, 1);
+      const points = values.map((v, i) => `${(i / (values.length - 1) * 500).toFixed(1)} ${(185 - (v - min) / span * 150).toFixed(1)}`);
+      el.setAttribute('d', 'M ' + points.join(' L '));
+    };
+    draw('temp', 'analyticsTempLine');
+    draw('baro', 'analyticsPressureLine');
+    const wind = sensorHistory.wind;
+    if (wind && wind.length) setText('analyticsWindValue', `${Math.max(...wind).toFixed(1)} km/h max in session`);
+  }
+
+  function applyWeatherData(data) {
+    latestBackendData = data;
+    const temp = readingValue(data, 'temperature');
+    const humidity = readingValue(data, 'humidity');
+    const wind = readingValue(data, 'wind');
+    const rain = readingValue(data, 'rainfall');
+    const pressure = readingValue(data, 'pressure');
+    const uv = readingValue(data, 'uv');
+    const aqi = readingValue(data, 'airQuality');
+    if ([temp, humidity, wind, rain, pressure, uv, aqi].some(v => v === null)) throw new Error('The Java API response is missing one or more sensor readings.');
+
+    baseTempC = temp; latestPressureHpa = pressure;
+    renderTemperatures();
+    setText('heroHumidity', `${humidity.toFixed(1)}%`);
+    setText('heroWind', `${wind.toFixed(1)} km/h`);
+    setPressureScale(activePressureScale);
+    setText('cardHumidityVal', `${humidity.toFixed(1)}%`);
+    setText('cardHumidityBar', '');
+    const humidityBar = document.getElementById('cardHumidityBar'); if (humidityBar) humidityBar.style.width = `${Math.min(100, humidity)}%`;
+    setText('cardRainVal', `${rain.toFixed(1)} mm/h`);
+    setText('cardRainSub', rain > 0 ? 'Rainfall currently detected by Java sensor' : 'No rainfall currently detected');
+    setText('cardRainStatus', rain > 0 ? 'Rain detected' : 'Dry conditions');
+    setText('cardRainForecast', data.rainLikely ? 'Rain likely' : 'No rain signal');
+    setText('cardWindVal', `${wind.toFixed(1)} km/h`);
+    setText('cardBaroVal', activePressureScale === 'hPa' ? `${pressure.toFixed(1)} hPa` : `${(pressure * 0.029529983).toFixed(2)} inHg`);
+    setText('heroBaro', activePressureScale === 'hPa' ? `${pressure.toFixed(1)} hPa` : `${(pressure * 0.029529983).toFixed(2)} inHg`);
+    setText('cardUvVal', uv.toFixed(1));
+    setText('cardUvStatus', data.readings.uv.status || 'Live Java sensor reading');
+    setText('cardAqiVal', aqi.toFixed(0));
+    setText('cardAqiStatus', data.readings.airQuality.status || 'Live Java sensor reading');
+    setText('heroFeelsLike', `Feels like ${temp.toFixed(1)}°C`);
+    setText('heroMinMax', `Live reading • ${data.condition || 'Weather monitored'}`);
+    setText('heroUpdatedTag', 'Java backend • Updated just now');
+
+    const risk = Number(data.riskScore) || 0;
+    setText('riskScoreVal', risk); setText('riskLevelVal', data.riskLevel || 'Unknown');
+    const riskBar = document.getElementById('riskScoreBar');
+    if (riskBar) { riskBar.style.width = `${Math.max(0, Math.min(100, risk))}%`; riskBar.className = `h-full rounded-full transition-all duration-500 ${risk >= 75 ? 'bg-red-400' : risk >= 50 ? 'bg-orange-400' : risk >= 25 ? 'bg-amber-400' : 'bg-emerald-400'}`; }
+    const riskLabel = document.getElementById('riskLevelVal');
+    if (riskLabel) riskLabel.className = `text-sm font-medium mt-2 ${risk >= 75 ? 'text-red-400' : risk >= 50 ? 'text-orange-400' : risk >= 25 ? 'text-amber-400' : 'text-emerald-400'}`;
+    updateList('backendAlerts', data.alerts, 'No active weather alerts.');
+    updateList('backendRecommendations', data.recommendations, 'No recommendations available.');
+
+    const values = {temp, humidity, rain, wind, baro:pressure, uv, airQuality:aqi};
+    Object.entries(values).forEach(([key, value]) => addHistory(key, value));
+    const keyMap = {temp:'temperature', humidity:'humidity', rain:'rainfall', wind:'wind', baro:'pressure'};
+    Object.entries(keyMap).forEach(([chartKey, apiKey]) => updateSensorSelector(apiKey, values[chartKey], data.readings[apiKey].unit));
+    drawSensorHistory(activeSensorKey);
+    drawAnalyticsHistory();
+
+    const condition = String(data.condition || '').toLowerCase();
+    const visualState = condition.includes('storm') ? 'storm' : (condition.includes('rain') ? 'rain' : (condition.includes('cloud') || condition.includes('humid') || condition.includes('polluted') ? 'cloudy' : 'clear'));
+    if (visualState !== currentCondition) changeWeatherState(visualState);
+    // changeWeatherState updates scene effects; restore the live Java readings it may touch.
+    baseTempC = temp; renderTemperatures();
+    setText('cardRainVal', `${rain.toFixed(1)} mm/h`);
+    setText('cardRainSub', rain > 0 ? 'Rainfall currently detected by Java sensor' : 'No rainfall currently detected');
+    setText('cardRainStatus', rain > 0 ? 'Rain detected' : 'Dry conditions');
+    setText('cardRainForecast', data.rainLikely ? 'Rain likely' : 'No rain signal');
+    setText('heroUpdatedTag', 'Java backend • Updated just now');
+  }
+  async function fetchWeatherData() {
+    try {
+      const response = await fetch(WEATHER_API_URL, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`Weather API returned HTTP ${response.status}`);
+      applyWeatherData(await response.json());
+      const tag = document.getElementById('heroUpdatedTag'); if (tag) tag.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400/80 pulse-status-green"></span> Java backend • Live';
+    } catch (error) {
+      const tag = document.getElementById('heroUpdatedTag');
+      if (tag) { tag.textContent = 'Backend disconnected • Start Java server on port 9090'; tag.classList.add('text-rose-400'); }
+      console.error('WEATHERIQ backend connection failed:', error);
+    }
+  }
+  async function checkBackendHealth() {
+    try { const response = await fetch(WEATHER_HEALTH_URL, {cache:'no-store'}); if (!response.ok) throw new Error('Health check failed'); }
+    catch (e) { console.warn('WeatherIQ health check:', e.message); }
+  }
+
+  // Live clock plus Java data polling every five seconds (same cadence as the sensors).
+  setInterval(() => {
+    const now = new Date();
+    const clock = document.getElementById('liveClockUtc');
+    if (clock) clock.textContent = now.toTimeString().split(' ')[0];
+  }, 1000);
+  fetchWeatherData();
+  checkBackendHealth();
+  setInterval(fetchWeatherData, 5000);
+</script>
+</body>
+</html>
