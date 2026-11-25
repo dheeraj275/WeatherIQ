@@ -1477,8 +1477,8 @@
   }
 
   // WEATHERIQ Java backend integration. All live readings now come from Java.
-  const WEATHER_API_URL = 'http://localhost:9090/api/weather';
-  const WEATHER_HEALTH_URL = 'http://localhost:9090/api/health';
+  const WEATHER_API_URL = 'https://weatheriq-backend.onrender.com/api/weather';
+  const WEATHER_HEALTH_URL = 'https://weatheriq-backend.onrender.com/api/health';
   let latestBackendData = null;
   let activePressureScale = 'hPa';
   const sensorHistory = { temp: [], humidity: [], rain: [], wind: [], baro: [], uv: [], airQuality: [] };
